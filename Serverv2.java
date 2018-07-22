@@ -36,14 +36,15 @@ class ClientControl extends ClientDetails implements Runnable
       String msg = in.readLine();
       while(msg != null && !"Quit".equals(msg))
       {
-        stdOut.println("<" + name + ">" + msg);
         String fMsg = "<" + name + ">" + msg;
-        //broadcast(fMsg);
-        out.println("<" + name + ">" + msg);
+        stdOut.println(fMsg);
+        broadcast(fMsg);
         msg = in.readLine();
       }
       removeClient(this);
       out.println("Conncetion Closed...");
+      broadcast(this.name + " has left...");
+      stdOut.println(this.name + " has left...");
       c.close();
     }
     catch(IOException e)
@@ -86,7 +87,15 @@ class ClientDetails
   static void addClient(ClientDetails client)
   {
     clientList.add(client);
-  //  stdOut.println("Size: " + clientList.size());
+    //  stdOut.println("Size: " + clientList.size());
+  }
+
+  static void printClientList()
+  {
+       for(ClientDetails client:clientList)
+       {
+         stdOut.println(" -->" + client.name);
+       }
   }
 
   static void removeClient(ClientDetails client)
@@ -94,16 +103,16 @@ class ClientDetails
     clientList.remove(client);
   }
 
-  // synchronized void broadcast(String msg)
-  // {
-  //   for(ClientDetails client:clientList)
-  //   {
-  //     while(client!=this)
-  //     {
-  //       client.out.println(msg);
-  //     }
-  //   }
-  // }
+  synchronized void broadcast(String msg)
+  {
+    for(ClientDetails client:clientList)
+    {
+      if(client!=this)
+      {
+        //stdOut.println("Sending to: " + client.name);
+        //stdOut.flush();
+        client.out.println(msg);
+      }
+    }
+  }
 }
-
-//sending message to ClientData object instead of socket FIXX IT!!!
